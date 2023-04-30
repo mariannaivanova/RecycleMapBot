@@ -10,6 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 public interface PointRepository extends JpaRepository<Points, Integer> {
     @Modifying
     @Transactional
-    @Query(value = "insert into points(id, address, restricted, title, geom) values (:id, :address, :restricted, :title, st_setsrid(st_makepoint(:lon, :lat), 4326))", nativeQuery = true)
-    public void save(Long id, String address, boolean restricted, String title, Double lon, Double lat);
+    @Query(value = "insert into points(id, address, title, geom, url) values (:id, :address, :title, st_setsrid(st_makepoint(:lon, :lat), 4326), :url)", nativeQuery = true)
+    public void save(Long id, String address, String title, Double lon, Double lat, String url);
 }

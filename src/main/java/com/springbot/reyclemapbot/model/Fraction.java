@@ -1,10 +1,10 @@
 package com.springbot.reyclemapbot.model;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import jakarta.persistence.*;
 import lombok.Data;
+
+import java.util.Set;
 
 @Entity
 @Data
@@ -18,4 +18,7 @@ public class Fraction {
 
     @Column(name = "color")
     private String color;
+
+    @ManyToMany(mappedBy = "fractions")
+    Set<Points> points;
 }

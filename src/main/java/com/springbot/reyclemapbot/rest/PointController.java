@@ -4,18 +4,19 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.springbot.reyclemapbot.DTO.PointDTO;
+import com.springbot.reyclemapbot.config.GeometryUtil;
+import com.springbot.reyclemapbot.model.Fraction;
 import com.springbot.reyclemapbot.model.Points;
 import com.springbot.reyclemapbot.repository.PointRepository;
+import com.springbot.reyclemapbot.serviceImplementation.FractionServiceImpl;
 import com.springbot.reyclemapbot.serviceImplementation.PointServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
 import org.json.JSONObject;
+import org.springframework.data.repository.query.Param;
 import org.springframework.data.util.Pair;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
@@ -24,7 +25,10 @@ import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import org.springframework.data.geo.Point;
 
 @RequiredArgsConstructor
 @RestController
@@ -32,37 +36,47 @@ public class PointController {
 
     private final PointServiceImpl pointService;
 
+    private final FractionServiceImpl fractionService;
+    private final String POINTS_URL = "https://new.recyclemap.ru/api/public/points?bbox=";
+
+    private final String POINT_VIEW_URL = "https://recyclemap-ui-main.rc.geosemantica.ru/viewer/points/";
 
     @RequestMapping(value = "/points", method = RequestMethod.GET)
-    /*public String getJson() throws IOException {
-        URL url = new URL("https://recyclemap-api-master.rc.geosemantica.ru/public/ecoadvices/random");
-        String json = IOUtils.toString(url, StandardCharsets.UTF_8);
-        return json;
-    }*/
-    public List<PointDTO> get() throws IOException {
-        URL url = new URL("https://recyclemap-api-master.rc.geosemantica.ru/public/points?bbox=-180,-89,180,89");
+    public void get() throws IOException {
+        this.pointService.save();
+    }
+
+
+    @RequestMapping(value = "/pointsForUser", method = RequestMethod.GET)
+    public List<PointDTO> getRecommendation(@RequestParam Double lon, @RequestParam Double lat, @RequestParam Double dist) throws IOException {
+        Double abs = Math.abs(Math.cos(Math.toRadians(lat)) * 111.0);
+        double lon1 = lon - dist / abs;
+        double lon2 = lon + dist / abs;
+        double lat1 = lat - (dist / 111.0);
+        double lat2 = lat + (dist / 111.0);
+        //west south east north
+        URL url = new URL(POINTS_URL + lon1 + "," + lat1 + "," + lon2 + "," + lat2 + "&offset=10");
         ObjectMapper mapper = new ObjectMapper();
+        //  JsonNode jsonNode = mapper.readTree(url).get("data");
+        //  Integer pointsNumber = mapper.readTree(url).get("data").get("totalResults").asInt();
         ArrayNode arrayNode = (ArrayNode) mapper.readTree(url).get("data").get("points");
-        List<PointDTO> pointDTOList = new ArrayList<PointDTO>();
-        for(JsonNode jsonNode : arrayNode) {
+        List<PointDTO> points = new ArrayList<>();
+        for (JsonNode jsonNode : arrayNode) {
             PointDTO pointDTO = new PointDTO();
             pointDTO.setPointId(jsonNode.get("pointId").asInt());
-            String[] words = jsonNode.get("geom").asText().replaceAll("[\\()a-zA-Z]", "").split(" ");
-            List<Double> coordinates = new ArrayList<Double>();
-            for (String word: words){
-                double d=Double.parseDouble(word);
-                coordinates.add(d);
-            }
-            pointDTO.setX(coordinates.get(0));
-            pointDTO.setY(coordinates.get(1));
             pointDTO.setAddress(jsonNode.get("address").asText());
             pointDTO.setTitle(jsonNode.get("title").asText());
-            pointDTO.setRestricted(jsonNode.get("restricted").asBoolean());
-            Points point = pointDTO.PointDTOToPoints();
-            this.pointService.save(jsonNode.get("pointId").asLong(), pointDTO.getAddress(), pointDTO.getRestricted(), pointDTO.getTitle(), pointDTO.getX(), pointDTO.getY());
-            pointDTOList.add(pointDTO);
+            String[] words = jsonNode.get("geom").asText().replaceAll("[\\()a-zA-Z]", "").split(" ");
+            pointDTO.setUrl(POINT_VIEW_URL + pointDTO.getId());
+            points.add(pointDTO);
+           // Points point = pointDTO.PointDTOToPoints();
+          //  this.pointService.save(jsonNode.get("pointId").asLong(), pointDTO.getAddress(), pointDTO.getTitle(),Double.parseDouble(words[0]), Double.parseDouble(words[1]));
+
         }
-        return pointDTOList;
+        if (!points.isEmpty()){
+
+        }
+        return points;
     }
 
 }

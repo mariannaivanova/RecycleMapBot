@@ -13,14 +13,14 @@ public class UserDTO {
 
      private String lastName;
 
-     private String userName;
+     private String username;
 
      public User UserDTOtoUser(){
          User user = new User();
          user.setChatId(this.chatId);
          user.setFirstName(this.firstName);
          user.setLastName(this.lastName);
-         user.setUserName(this.userName);
+         user.setUsername(this.username);
          return user;
      }
 }

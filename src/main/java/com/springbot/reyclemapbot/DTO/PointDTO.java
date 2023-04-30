@@ -15,26 +15,26 @@ import java.util.List;
 @Setter
 public class PointDTO {
     private Long id;
-    private Double x;
-    private Double y;
+ //   private Double x;
+   // private Double y;
+    private String url;
     private Integer pointId;
     private String address;
     private String title;
-    private Boolean restricted;
 /*    private RatingDTO rating;
     private List<FractionDTO> fractions;*/
     public PointDTO(){}
 
-    public Points PointDTOToPoints(){
+    /*public Points PointDTOToPoints(){
         Points point = new Points();
-     /*   Coordinate c1 = new Coordinate(this.x, this.y);
+     *//*   Coordinate c1 = new Coordinate(this.x, this.y);
         GeometryFactory geometryFactory = new GeometryFactory();//static заранее
         Point geom = geometryFactory.createPoint(c1);
-        point.setGeom(geom);*/
+        point.setGeom(geom);*//*
         point.setId(this.pointId);
         point.setAddress(this.address);
         point.setTitle(this.title);
         point.setRestricted(this.restricted);
         return point;
-    }
+    }*/
 }

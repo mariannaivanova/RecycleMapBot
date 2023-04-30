@@ -1,8 +1,13 @@
 package com.springbot.reyclemapbot.service;
 
+import com.springbot.reyclemapbot.model.Fraction;
 import com.springbot.reyclemapbot.model.Points;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.util.Set;
+
 public interface PointService {
-    void save(Long id, String address, boolean restricted, String title, Double lon, Double lat);
+    void save() throws IOException;
 
 }

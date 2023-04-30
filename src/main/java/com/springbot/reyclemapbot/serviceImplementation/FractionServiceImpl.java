@@ -18,4 +18,9 @@ public class FractionServiceImpl implements FractionService {
     public void save(Fraction fraction) {
         fractionRepository.save(fraction);
     }
+
+    @Override
+    public Fraction getFractionById(Integer id) {
+        return this.fractionRepository.getFractionById(id);
+    }
 }
