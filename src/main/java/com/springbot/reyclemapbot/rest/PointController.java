@@ -3,6 +3,7 @@ package com.springbot.reyclemapbot.rest;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.springbot.reyclemapbot.DTO.Helper;
 import com.springbot.reyclemapbot.DTO.PointDTO;
 import com.springbot.reyclemapbot.config.GeometryUtil;
 import com.springbot.reyclemapbot.model.Fraction;
@@ -10,6 +11,7 @@ import com.springbot.reyclemapbot.model.Points;
 import com.springbot.reyclemapbot.repository.PointRepository;
 import com.springbot.reyclemapbot.serviceImplementation.FractionServiceImpl;
 import com.springbot.reyclemapbot.serviceImplementation.PointServiceImpl;
+import com.vividsolutions.jts.geom.Point;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.IOUtils;
 import org.json.JSONArray;
@@ -28,7 +30,6 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import org.springframework.data.geo.Point;
 
 @RequiredArgsConstructor
 @RestController
@@ -79,4 +80,14 @@ public class PointController {
         return points;
     }
 
+
+    @RequestMapping(value = "/pointsRec", method = RequestMethod.GET)
+    public List<String> getRec(@RequestBody Helper helper) throws IOException {
+        return this.pointService.getRec(helper);
+    }
+
+    @RequestMapping(value = "/point/delete/{id}", method = RequestMethod.DELETE)
+    public void delete(@PathVariable("id") Long id) throws IOException {
+        this.pointService.delete(id);
+    }
 }

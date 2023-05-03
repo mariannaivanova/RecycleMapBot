@@ -5,14 +5,14 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.geo.Point;
+import com.vividsolutions.jts.geom.Point;
+//import org.springframework.data.geo.Point;
 
 import java.util.HashSet;
 import java.util.Set;
 
 
 @Entity
-@Data
 @Getter
 @Setter
 @Table(name = "points")
@@ -28,8 +28,14 @@ public class Points {
     @Column(name = "title")
     private String title;
 
-    @Column(name = "geom")
+    @Column(columnDefinition = "geometry(Point,4326)")
     private Point geom;
+
+    private boolean restricted;
+
+    public boolean getRestricted(){
+        return this.restricted;
+    }
 
     @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY)

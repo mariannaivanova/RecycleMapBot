@@ -18,6 +18,9 @@ public interface SubscribeRepository extends JpaRepository<Subscribe, Integer> {
     @Query(value = "insert into subscribes(chat_id, geom, dist) values (:chatId, st_setsrid(st_makepoint(:lon, :lat), 4326), :dist)", nativeQuery = true)
     public void saveSubscribe(Long chatId, Double lon, Double lat, Double dist);
 
+
+    public Subscribe getSubscribeByChatId(Long chatId);
+
 /*    @Modifying
     @Transactional
     @Query(value = "insert into subscribes_points(subscribe_id, point_id) where select u FROM User u WHERE u.name IN :names", nativeQuery = true)

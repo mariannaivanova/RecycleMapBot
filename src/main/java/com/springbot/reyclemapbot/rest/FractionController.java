@@ -22,14 +22,7 @@ public class FractionController {
 
     @RequestMapping(value = "/fractions", method = RequestMethod.GET)
     public void saveFractions() throws IOException {
-        URL url = new URL("https://recyclemap-api-master.rc.geosemantica.ru/public/fractions");
-        ObjectMapper mapper = new ObjectMapper();
-        ArrayNode arrayNode = (ArrayNode) mapper.readTree(url).get("data");
-        for(JsonNode jsonNode : arrayNode) {
-            FractionDTO fractionDTO = new FractionDTO(jsonNode.get("id").asInt(), jsonNode.get("name").asText(), jsonNode.get("color").asText());
-            Fraction fraction = fractionDTO.FractionDTOtoFraction();
-            this.fractionService.save(fraction);
-        }
+        this.fractionService.save();
     }
 
 }

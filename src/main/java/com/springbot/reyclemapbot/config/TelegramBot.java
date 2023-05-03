@@ -8,6 +8,9 @@ import com.springbot.reyclemapbot.model.User;
 import com.springbot.reyclemapbot.repository.SubscribeRepository;
 import com.springbot.reyclemapbot.repository.UserRepository;
 import com.springbot.reyclemapbot.rest.PointController;
+import com.springbot.reyclemapbot.serviceImplementation.FractionServiceImpl;
+import com.springbot.reyclemapbot.serviceImplementation.PointServiceImpl;
+import com.springbot.reyclemapbot.serviceImplementation.UserServiceImpl;
 import jakarta.validation.constraints.NotNull;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
@@ -51,6 +54,10 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final SubscribeRepository subscribeRepository;
 
     private final PointController pointController;
+
+    private final FractionServiceImpl fractionService;
+
+    private final PointServiceImpl pointService;
 
     private final BotConfig config;
 
@@ -198,7 +205,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final String ECOADVICES_URL = "https://recyclemap-api-master.rc.geosemantica.ru/public/ecoadvices/random";
 
 
-    @Scheduled(fixedDelay = 120000)
+   // @Scheduled(fixedDelay = 120000)
     public void sendEcoAdvice() throws IOException {
         URL url = new URL(ECOADVICES_URL);
         ObjectMapper mapper = new ObjectMapper();
@@ -215,6 +222,25 @@ public class TelegramBot extends TelegramLongPollingBot {
             }
         }
 
+    }
+
+
+  //  @Scheduled(fixedDelay = 120000)
+    public void updateDatabase() throws IOException {
+        this.fractionService.save();
+        this.pointService.save();
+        //delete from points_fractions where point_id in (select point_id
+        //	from points_history
+        //	where updated = false and upper(valid_range) is NULL
+        //				and (now() - INTERVAL '2400 seconds') > lower(valid_range) and point_id < 10);
+        //обновляем подписки
+        List<Long> deletedIds = this.pointService.getDeleted();
+        if (!deletedIds.isEmpty()) {
+            for (Long id: deletedIds) {
+                this.pointService.delete(id);
+            }
+        }
+        //обновляем подписки
     }
 
 }
