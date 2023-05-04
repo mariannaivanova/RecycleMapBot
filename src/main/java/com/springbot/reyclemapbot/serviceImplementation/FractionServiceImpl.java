@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +26,7 @@ public class FractionServiceImpl implements FractionService {
 
     @Override
     public void save() throws IOException {
-        URL url = new URL("https://recyclemap-api-master.rc.geosemantica.ru/public/fractions");
+        URL url = new URL("https://new.recyclemap.ru/api/public/fractions");
         ObjectMapper mapper = new ObjectMapper();
         ArrayNode arrayNode = (ArrayNode) mapper.readTree(url).get("data");
         for(JsonNode jsonNode : arrayNode) {
@@ -37,5 +39,9 @@ public class FractionServiceImpl implements FractionService {
     @Override
     public Fraction getFractionById(Integer id) {
         return this.fractionRepository.getFractionById(id);
+    }
+
+    public Set<String> getFractionIdsBySubscribeId(Long id){
+        return this.fractionRepository.getFractionIdsBySubscribeId(id);
     }
 }

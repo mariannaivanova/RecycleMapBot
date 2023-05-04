@@ -20,7 +20,7 @@ public class UserDTO {
          user.setChatId(this.chatId);
          user.setFirstName(this.firstName);
          user.setLastName(this.lastName);
-         user.setUsername(this.username);
+         user.setUserName(this.username);
          return user;
      }
 }

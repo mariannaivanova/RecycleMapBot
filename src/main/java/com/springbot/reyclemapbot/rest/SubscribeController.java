@@ -1,5 +1,7 @@
 package com.springbot.reyclemapbot.rest;
 
+import com.springbot.reyclemapbot.DTO.SubscribeDTO;
+import com.springbot.reyclemapbot.DTO.SubscribeString;
 import com.springbot.reyclemapbot.DTO.UserDTO;
 import com.springbot.reyclemapbot.model.Fraction;
 import com.springbot.reyclemapbot.model.User;
@@ -10,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.telegram.telegrambots.meta.api.objects.Location;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Set;
 
 @RestController
@@ -21,6 +24,11 @@ public class SubscribeController {
     @RequestMapping(value = "/subscribe/{chatId}", method = RequestMethod.POST)
     public void saveSubscribe(@PathVariable("chatId") Long chatId, @RequestBody Location location, Double dist, Set<Fraction> fractions) throws IOException {
         this.subscribeService.save(chatId, location, dist, fractions);
+    }
+
+    @RequestMapping(value = "/subscribe/{id}", method = RequestMethod.GET)
+    public SubscribeString getSubscribeById(@PathVariable("id") Long id) throws IOException {
+        return this.subscribeService.getSubscribeById(id);
     }
 
 }

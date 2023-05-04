@@ -23,18 +23,27 @@ public interface PointRepository extends JpaRepository<Points, Integer> {
 
 
     @Transactional
-    @Query(value = "SELECT ST_AsText(geom) from points\n" +
-            "WHERE id in (SELECT id\n" +
+    @Query(value = "SELECT id\n" +
             "from (SELECT DISTINCT id, address, ST_AsText(geom) AS geom,\n" +
             "       ST_DistanceSphere(geom, st_setsrid(st_makepoint(:lon, :lat), 4326)) AS dist\n" +
             "FROM points_fractions_view\n" +
-            "WHERE fraction in :fractions\n" +
+            "WHERE fraction in :fractions and restricted = false\n" +
             "ORDER BY dist\n" +
-            "LIMIT 10) a1\n" +
-            "where a1.dist <= :dist)", nativeQuery = true)
-    public List<String> getRec(Double lon, Double lat, Double dist, Set<String> fractions);
+            "LIMIT 5) a1\n" +
+            "where a1.dist <= :dist", nativeQuery = true)
+    public List<Long> getRec(Double lon, Double lat, Double dist, Set<String> fractions);
 
 
+
+    @Transactional
+    @Query(value = "SELECT id\n" +
+            "from (SELECT DISTINCT id, address, ST_AsText(geom) AS geom,\n" +
+            "       ST_DistanceSphere(geom, st_setsrid(st_makepoint(:lon, :lat), 4326)) AS dist\n" +
+            "FROM points_fractions_view\n" +
+            "WHERE fraction in :fractions and restricted = false\n " +
+            "ORDER BY dist\n" +
+            "LIMIT 5) a1", nativeQuery = true)
+    public List<Long> getClosest(Double lon, Double lat, Set<String> fractions);
 
     @Transactional
     @Query(value = "select point_id \n" +
@@ -42,6 +51,16 @@ public interface PointRepository extends JpaRepository<Points, Integer> {
             "\twhere updated = false and upper(valid_range) is NULL\n" +
             "\t\t\t\tand (now() - INTERVAL '1 day') > lower(valid_range) and point_id < 10", nativeQuery = true)
     public List<Long> getDeleted();
+
+
+    @Transactional
+    @Query(value = "SELECT p.id\n" +
+            "    FROM subscribes s\n" +
+            "         LEFT OUTER JOIN subscribes_points sp ON sp.subscribe_id = s.id\n" +
+            "         LEFT OUTER JOIN points p ON p.id = sp.point_id where s.id = :id" +
+            "    ORDER BY p.id",
+            nativeQuery = true)
+    public List<Long> getPointsBySubscribeId(Long id);
 
     @Modifying
     @Transactional

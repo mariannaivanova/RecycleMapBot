@@ -13,7 +13,7 @@ import java.util.Set;
 public interface PointService {
     void save() throws IOException;
 
-    List<String>  getRec(Helper helper);
+    List<Long> getRec(Double lon, Double lat, Double dist, Set<String> fractions);
 
     void delete(Long id);
 

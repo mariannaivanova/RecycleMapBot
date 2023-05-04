@@ -81,9 +81,15 @@ public class PointController {
     }
 
 
-    @RequestMapping(value = "/pointsRec", method = RequestMethod.GET)
-    public List<String> getRec(@RequestBody Helper helper) throws IOException {
+   /* @RequestMapping(value = "/pointsRec", method = RequestMethod.GET)
+    public List<Long> getRec(@RequestBody Helper helper) throws IOException {
         return this.pointService.getRec(helper);
+    }*/
+
+
+    @RequestMapping(value = "/pointsDefault", method = RequestMethod.GET)
+    public List<Long> getRecByDefault(@RequestParam Double lon, @RequestParam Double lat) throws IOException {
+        return this.pointService.getRecByDefault(lon, lat);
     }
 
     @RequestMapping(value = "/point/delete/{id}", method = RequestMethod.DELETE)

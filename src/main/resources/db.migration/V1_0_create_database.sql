@@ -57,14 +57,14 @@ CREATE TABLE IF NOT EXISTS subscribes_fractions
     FOREIGN KEY (subscribe_id) REFERENCES subscribes (id),
     FOREIGN KEY (fraction_id) REFERENCES fractions (id) ON DELETE CASCADE
 );
-/*
+
 CREATE INDEX IF NOT EXISTS points_idx ON points USING gist(geom);
 
 CREATE VIEW points_fractions_view AS
-    SELECT p.id, p.title, p.address, p.geom, p.url, f."name" as fraction
+    SELECT p.id, p.title, p.address, p.geom, p.url, p.restricted, f."name" as fraction
     FROM points p
          LEFT OUTER JOIN points_fractions pf ON pf.point_id = p.id
-         LEFT OUTER JOIN fractions f ON f.id = pf.fraction_id;*/
+         LEFT OUTER JOIN fractions f ON f.id = pf.fraction_id;
 
 DROP TABLE IF EXISTS points_history;
 CREATE TABLE IF NOT EXISTS points_history (
@@ -86,3 +86,72 @@ CREATE INDEX nyc_streets_history_tstz_x
     ON points_history USING GIST (valid_range);*/
 
 
+INSERT INTO points_history
+(point_id, geom, address, title, url, restricted, valid_range, updated)
+SELECT id, geom, address, title, url, restricted,
+       tstzrange(now(), NULL), false
+FROM points;
+
+
+CREATE OR REPLACE FUNCTION points_insert() RETURNS trigger AS
+$$
+BEGIN
+    INSERT INTO points_history
+    (point_id, geom, address, title, url, restricted, valid_range, updated)
+    VALUES
+        (NEW.id, NEW.geom, NEW.address, NEW.title, NEW.url, NEW.restricted,
+         tstzrange(current_timestamp, NULL), false);
+    RETURN NEW;
+END;
+$$
+    LANGUAGE plpgsql;
+
+CREATE TRIGGER points_insert_trigger
+    AFTER INSERT ON points
+    FOR EACH ROW EXECUTE PROCEDURE points_insert();
+
+
+CREATE OR REPLACE FUNCTION points_delete() RETURNS trigger AS
+$$
+BEGIN
+    UPDATE points_history
+    SET valid_range = tstzrange(lower(valid_range), current_timestamp), updated = true
+    WHERE valid_range @> current_timestamp AND point_id = OLD.id;
+
+    /* DELETE FROM points_fractions where point_id = OLD.id;*/
+    RETURN NULL;
+END;
+$$
+    LANGUAGE plpgsql;
+
+
+CREATE TRIGGER points_delete_trigger
+    AFTER DELETE ON points
+    FOR EACH ROW EXECUTE PROCEDURE points_delete();
+
+CREATE OR REPLACE FUNCTION points_update() RETURNS trigger AS
+$$
+BEGIN
+    IF NEW.address <> OLD.address OR NEW.title <> OLD.title OR NEW.restricted <> OLD.restricted THEN
+        UPDATE points_history
+        SET valid_range = tstzrange(lower(valid_range), current_timestamp)
+        WHERE valid_range @> current_timestamp AND point_id = OLD.id;
+
+        INSERT INTO points_history
+        (point_id, geom, address, title, url, restricted, valid_range, updated)
+        VALUES
+            (NEW.id, NEW.geom, NEW.address, NEW.title, NEW.url, NEW.restricted,
+             tstzrange(current_timestamp, NULL), true);
+        RETURN NEW;
+    ELSE UPDATE points_history
+         SET valid_range = tstzrange(current_timestamp, NULL), updated = false
+         WHERE upper(valid_range) is NULL AND point_id = OLD.id;
+    END IF;
+    RETURN OLD;
+END;
+$$
+    LANGUAGE plpgsql;
+
+CREATE TRIGGER points_update_trigger
+    AFTER UPDATE ON points
+    FOR EACH ROW EXECUTE PROCEDURE points_update();

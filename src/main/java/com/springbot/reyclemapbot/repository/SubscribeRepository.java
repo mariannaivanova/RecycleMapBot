@@ -1,6 +1,7 @@
 package com.springbot.reyclemapbot.repository;
 
 import com.springbot.reyclemapbot.DTO.SubscribeDTO;
+import com.springbot.reyclemapbot.DTO.SubscribeString;
 import com.springbot.reyclemapbot.model.Points;
 import com.springbot.reyclemapbot.model.Subscribe;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -20,6 +21,15 @@ public interface SubscribeRepository extends JpaRepository<Subscribe, Integer> {
 
 
     public Subscribe getSubscribeByChatId(Long chatId);
+
+    @Transactional
+    @Query(value = "select id from subscribes", nativeQuery = true)
+    public List<Long> getAllSubscribeIds();
+
+    @Transactional
+    @Query(value = "select chat_id, st_astext(geom) as location, dist from subscribes where id = :id", nativeQuery = true)
+    public SubscribeString getSubscribeById(Long id);
+
 
 /*    @Modifying
     @Transactional

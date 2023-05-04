@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.springbot.reyclemapbot.DTO.Helper;
 import com.springbot.reyclemapbot.config.GeometryUtil;
-import com.springbot.reyclemapbot.model.Fraction;
 import com.springbot.reyclemapbot.model.Points;
 import com.springbot.reyclemapbot.repository.PointFractionRepository;
 import com.springbot.reyclemapbot.repository.PointRepository;
@@ -17,8 +16,8 @@ import com.vividsolutions.jts.geom.Point;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -43,7 +42,7 @@ public class PointServiceImpl implements PointService {
         Integer pointsNumber = mapper.readTree(url).get("data").get("totalResults").asInt();
         Integer i = 0;
 
-        while (i <= pointsNumber) {
+        while (i <= 100) {
             URL curUrl = new URL(POINTS_URL + "-180,-89,180,89"+ "&size=100" + "&offset=" + i);
             ArrayNode arrayNode = (ArrayNode) mapper.readTree(curUrl).get("data").get("points");
             for (JsonNode jsonNode : arrayNode) {
@@ -79,8 +78,27 @@ public class PointServiceImpl implements PointService {
     }
 
     @Override
-    public List<String> getRec(Helper helper) {
-        return this.pointRepository.getRec(helper.getLon(), helper.getLat(), helper.getDist(), helper.getFractions());
+    public List<Long> getRec(Double lon, Double lat, Double dist, Set<String> fractions) {
+        return this.pointRepository.getRec(lon, lat, dist, fractions);
+    }
+
+    public List<Long> getRecByDefault(Double lon, Double lat){
+        Double dist = 500.00;
+        Set<String> fractions = new HashSet<>();
+        fractions.add("BUMAGA");
+        fractions.add("PLASTIK");
+        fractions.add("STEKLO");
+        fractions.add("LAMPOCHKI");
+        List<Long> ids = new ArrayList<>();
+        while ((dist <= 3000)&&(ids.size()< 5)){
+            log.info("IN PointService getRec {}", dist);
+            ids = this.pointRepository.getRec(lon, lat, dist, fractions);
+            dist += 500;
+        }
+        if (ids.size() <= 5){
+            ids = this.pointRepository.getClosest(lon, lat, fractions);
+        };
+        return ids;
     }
 
     @Override
@@ -93,5 +111,8 @@ public class PointServiceImpl implements PointService {
         return this.pointRepository.getDeleted();
     }
 
+    public List<Long> getPointsBySubscribeId(Long id){
+        return this.pointRepository.getPointsBySubscribeId(id);
+    }
 
 }

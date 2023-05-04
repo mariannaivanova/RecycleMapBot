@@ -3,6 +3,7 @@ package com.springbot.reyclemapbot.config;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.springbot.reyclemapbot.DTO.PointDTO;
 import com.springbot.reyclemapbot.DTO.SubscribeDTO;
+import com.springbot.reyclemapbot.DTO.SubscribeString;
 import com.springbot.reyclemapbot.model.Subscribe;
 import com.springbot.reyclemapbot.model.User;
 import com.springbot.reyclemapbot.repository.SubscribeRepository;
@@ -12,9 +13,11 @@ import com.springbot.reyclemapbot.serviceImplementation.FractionServiceImpl;
 import com.springbot.reyclemapbot.serviceImplementation.PointServiceImpl;
 import com.springbot.reyclemapbot.serviceImplementation.UserServiceImpl;
 import jakarta.validation.constraints.NotNull;
+import com.vividsolutions.jts.geom.Point;
 import lombok.NoArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.mapping.Collection;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.EnableAsync;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -40,7 +43,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
+import java.util.*;
 import java.util.List;
 
 @RequiredArgsConstructor
@@ -60,6 +63,7 @@ public class TelegramBot extends TelegramLongPollingBot {
     private final PointServiceImpl pointService;
 
     private final BotConfig config;
+
 
     @Override
     public String getBotUsername() { return config.getBotUsername(); }
@@ -195,7 +199,7 @@ public class TelegramBot extends TelegramLongPollingBot {
             user.setChatId(chatId);
             user.setFirstName(chat.getFirstName());
             user.setLastName(chat.getLastName());
-            user.setUsername(chat.getUserName());
+            user.setUserName(chat.getUserName());
 
             userRepository.save(user);
             log.info("user saved: " + user);
@@ -240,7 +244,30 @@ public class TelegramBot extends TelegramLongPollingBot {
                 this.pointService.delete(id);
             }
         }
+        List<Long> subscribeIds = this.subscribeRepository.getAllSubscribeIds();
+        for (Long subscribeId: subscribeIds) {
+                Set<String> fractionIds = this.fractionService.getFractionIdsBySubscribeId(subscribeId);
+                SubscribeString subscribeString = this.subscribeRepository.getSubscribeById(subscribeId);
+                List<Long> currentPoints = this.pointService.getPointsBySubscribeId(subscribeId);
+                Point point = GeometryUtil.parseLocation(subscribeString.getLocation());
+                List<Long> newPoints = this.pointService.getRec(point.getX(), point.getY(), subscribeString.getDist(), fractionIds);
+                Collections.sort(newPoints);
+                Long chatId = subscribeString.getChatId();
+                if (!Objects.equals(currentPoints, newPoints)) {
+                    SendMessage message = new SendMessage();
+                    message.setChatId(chatId);
+                    message.setText("test");
+                    log.info("Found changes");
+                    try {
+                            execute(message);
+                        } catch (TelegramApiException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                log.info("Found changes");
+                }
+
+        }
         //обновляем подписки
     }
 
-}
