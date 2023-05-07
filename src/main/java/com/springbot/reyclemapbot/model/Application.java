@@ -10,8 +10,8 @@ import java.util.Set;
 
 @Entity
 @Data
-@Table(name = "subscribes")
-public class Subscribe {
+@Table(name = "applications")
+public class Application {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -21,20 +21,20 @@ public class Subscribe {
 
     private Point geom;
 
-    private Double dist;
+    private String title;
 
     @JsonIgnore
     @ManyToMany(fetch = FetchType.LAZY)
-    @JoinTable(name = "subscribes_points",
-            joinColumns = @JoinColumn(name = "subscribe_id"),
-            inverseJoinColumns = @JoinColumn(name = "point_id"))
-    private Set<Points> points = new HashSet<>();
+    @JoinTable(name = "applications_fractions",
+            joinColumns = @JoinColumn(name = "application_id"),
+            inverseJoinColumns = @JoinColumn(name = "fraction_id"))
+    private Set<Fraction> fractions = new HashSet<>();
 
-    public Set<Points> getPoints() {
-        return points;
+    public Set<Fraction> getFractions() {
+        return fractions;
     }
 
-    public void setPoints(Set<Points> points) {
-        this.points = points;
+    public void setFractions(Set<Fraction> fractions) {
+        this.fractions = fractions;
     }
 }

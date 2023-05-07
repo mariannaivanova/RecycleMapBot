@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.springbot.reyclemapbot.DTO.Helper;
 import com.springbot.reyclemapbot.DTO.PointDTO;
+import com.springbot.reyclemapbot.DTO.PointPayload;
 import com.springbot.reyclemapbot.config.GeometryUtil;
 import com.springbot.reyclemapbot.model.Fraction;
 import com.springbot.reyclemapbot.model.Points;
@@ -47,8 +48,19 @@ public class PointController {
         this.pointService.save();
     }
 
-
     @RequestMapping(value = "/pointsForUser", method = RequestMethod.GET)
+    public List<PointPayload> getPayloadForUser(@RequestParam Set<Long> pointIds) throws IOException {
+        List<PointPayload> pointPayloads = new ArrayList<>();
+        for (Long pointId: pointIds){
+            PointDTO pointDTO = this.pointService.getPointInfo(pointId);
+            Set<String> fractions = this.fractionService.getFractionIdsByPointId(pointId);
+            PointPayload   pointPayload = new PointPayload(pointDTO, fractions);
+            pointPayloads.add(pointPayload);
+        }
+        return pointPayloads;
+    }
+
+   /* @RequestMapping(value = "/pointsForUser", method = RequestMethod.GET)
     public List<PointDTO> getRecommendation(@RequestParam Double lon, @RequestParam Double lat, @RequestParam Double dist) throws IOException {
         Double abs = Math.abs(Math.cos(Math.toRadians(lat)) * 111.0);
         double lon1 = lon - dist / abs;
@@ -79,7 +91,7 @@ public class PointController {
         }
         return points;
     }
-
+*/
 
    /* @RequestMapping(value = "/pointsRec", method = RequestMethod.GET)
     public List<Long> getRec(@RequestBody Helper helper) throws IOException {
@@ -88,7 +100,7 @@ public class PointController {
 
 
     @RequestMapping(value = "/pointsDefault", method = RequestMethod.GET)
-    public List<Long> getRecByDefault(@RequestParam Double lon, @RequestParam Double lat) throws IOException {
+    public Set<Long> getRecByDefault(@RequestParam Double lon, @RequestParam Double lat) throws IOException {
         return this.pointService.getRecByDefault(lon, lat);
     }
 

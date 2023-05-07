@@ -44,4 +44,8 @@ public class FractionServiceImpl implements FractionService {
     public Set<String> getFractionIdsBySubscribeId(Long id){
         return this.fractionRepository.getFractionIdsBySubscribeId(id);
     }
+
+    public Set<String> getFractionIdsByPointId(Long pointId) {
+        return this.fractionRepository.getFractionIdsByPointId(pointId);
+    }
 }

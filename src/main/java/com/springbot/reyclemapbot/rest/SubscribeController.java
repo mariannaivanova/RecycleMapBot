@@ -22,8 +22,8 @@ public class SubscribeController {
     private final SubscribeServiceImpl subscribeService;
 
     @RequestMapping(value = "/subscribe/{chatId}", method = RequestMethod.POST)
-    public void saveSubscribe(@PathVariable("chatId") Long chatId, @RequestBody Location location, Double dist, Set<Fraction> fractions) throws IOException {
-        this.subscribeService.save(chatId, location, dist, fractions);
+    public void saveSubscribe(@PathVariable("chatId") Long chatId, @RequestBody Double lon, Double lat, Double dist, Set<Integer> fractions, Set<Long> pointIds) throws IOException {
+        this.subscribeService.save(chatId, lon, lat, dist, fractions, pointIds);
     }
 
     @RequestMapping(value = "/subscribe/{id}", method = RequestMethod.GET)

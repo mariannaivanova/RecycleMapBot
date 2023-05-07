@@ -1,5 +1,6 @@
 package com.springbot.reyclemapbot.repository;
 
+import com.springbot.reyclemapbot.DTO.PointDTO;
 import com.springbot.reyclemapbot.model.Points;
 import com.vividsolutions.jts.geom.Point;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -31,7 +32,7 @@ public interface PointRepository extends JpaRepository<Points, Integer> {
             "ORDER BY dist\n" +
             "LIMIT 5) a1\n" +
             "where a1.dist <= :dist", nativeQuery = true)
-    public List<Long> getRec(Double lon, Double lat, Double dist, Set<String> fractions);
+    public Set<Long> getRec(Double lon, Double lat, Double dist, Set<String> fractions);
 
 
 
@@ -43,7 +44,7 @@ public interface PointRepository extends JpaRepository<Points, Integer> {
             "WHERE fraction in :fractions and restricted = false\n " +
             "ORDER BY dist\n" +
             "LIMIT 5) a1", nativeQuery = true)
-    public List<Long> getClosest(Double lon, Double lat, Set<String> fractions);
+    public Set<Long> getClosest(Double lon, Double lat, Set<String> fractions);
 
     @Transactional
     @Query(value = "select point_id \n" +
@@ -60,10 +61,31 @@ public interface PointRepository extends JpaRepository<Points, Integer> {
             "         LEFT OUTER JOIN points p ON p.id = sp.point_id where s.id = :id" +
             "    ORDER BY p.id",
             nativeQuery = true)
-    public List<Long> getPointsBySubscribeId(Long id);
+    public Set<Long> getPointsBySubscribeId(Long id);
 
     @Modifying
     @Transactional
     @Query(value = "delete from points where id = :id", nativeQuery = true)
     public void deleteById(Long id);
+
+
+    @Transactional
+    @Query(value = "SELECT updated\n" +
+            "\tFROM public.points_history\n" +
+            "\twhere point_id in :pointIds", nativeQuery = true)
+    public List<Boolean> checkUpdates(Set<Long> pointIds);
+
+
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE public.points_history\n" +
+            "\tSET updated=false", nativeQuery = true)
+    public void setUpdatedFalse();
+
+    @Transactional
+    @Query(value = "SELECT address, title, url\n" +
+            "\tFROM public.points " +
+            "where id = :id", nativeQuery = true)
+    public PointDTO getPointInfo(Long id);
+
 }

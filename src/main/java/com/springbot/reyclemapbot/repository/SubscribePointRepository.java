@@ -26,4 +26,14 @@ public class SubscribePointRepository {
         }
 
     }
+
+    @Modifying
+    @Transactional
+    public void deleteSubscribePoint(Long subscribeId) {
+
+            entityManager.createNativeQuery("DELETE from subscribes_points where subscribe_id = ?")
+                    .setParameter(1, subscribeId)
+                    .executeUpdate();
+
+    }
 }

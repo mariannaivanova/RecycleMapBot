@@ -9,7 +9,7 @@ CREATE TABLE if not exists users
 
 CREATE TABLE if not exists subscribes
 (
-    id            BIGINT                NOT NULL PRIMARY KEY,
+    id            SERIAL          PRIMARY KEY,
     chat_id       BIGINT,
     geom     geometry(POINT, 4326) NOT NULL,
     dist           DOUBLE PRECISION,
@@ -84,7 +84,22 @@ CREATE TABLE IF NOT EXISTS points_history (
 
 CREATE INDEX nyc_streets_history_tstz_x
     ON points_history USING GIST (valid_range);*/
+CREATE TABLE if not exists applications
+(
+    id            SERIAL          PRIMARY KEY,
+    chat_id       BIGINT,
+    geom     geometry(POINT, 4326),
+    title           VARCHAR,
+    FOREIGN KEY (chat_id) REFERENCES users (chat_id)
+);
 
+CREATE TABLE IF NOT EXISTS applications_fractions
+(
+    application_id INTEGER,
+    fraction_id        INTEGER,
+    FOREIGN KEY (application_id) REFERENCES applications (id),
+    FOREIGN KEY (fraction_id) REFERENCES fractions (id) ON DELETE CASCADE
+);
 
 INSERT INTO points_history
 (point_id, geom, address, title, url, restricted, valid_range, updated)

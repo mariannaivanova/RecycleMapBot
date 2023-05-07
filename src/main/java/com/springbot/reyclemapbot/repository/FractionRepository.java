@@ -18,4 +18,12 @@ public interface FractionRepository extends JpaRepository<Fraction, Integer> {
             "         LEFT OUTER JOIN fractions f ON f.id = sf.fraction_id where s.id = :id",
             nativeQuery = true)
     public Set<String> getFractionIdsBySubscribeId(Long id);
+
+    @Transactional
+    @Query(value = "SELECT f.name\n" +
+            "    FROM points p\n" +
+            "         LEFT OUTER JOIN points_fractions pf ON pf.point_id = p.id\n" +
+            "         LEFT OUTER JOIN fractions f ON f.id = pf.fraction_id where p.id = :id",
+            nativeQuery = true)
+    public Set<String> getFractionIdsByPointId(Long id);
 }

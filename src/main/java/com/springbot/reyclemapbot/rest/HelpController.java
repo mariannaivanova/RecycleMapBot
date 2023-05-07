@@ -6,6 +6,7 @@ import com.springbot.reyclemapbot.repository.SubscribeRepository;
 import com.springbot.reyclemapbot.repository.UserRepository;
 import com.springbot.reyclemapbot.serviceImplementation.FractionServiceImpl;
 import com.springbot.reyclemapbot.serviceImplementation.PointServiceImpl;
+import com.springbot.reyclemapbot.serviceImplementation.SubscribeServiceImpl;
 import com.vividsolutions.jts.geom.Point;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +33,8 @@ public class HelpController {
 
     private final PointServiceImpl pointService;
 
+    private final SubscribeServiceImpl subscribeService;
+
     @RequestMapping(value = "/updatedb", method = RequestMethod.POST)
     public void update() throws IOException {
         this.fractionService.save();
@@ -46,23 +49,26 @@ public class HelpController {
         for (Long subscribeId: subscribeIds) {
             Set<String> fractionIds = this.fractionService.getFractionIdsBySubscribeId(subscribeId);
             SubscribeString subscribeString = this.subscribeRepository.getSubscribeById(subscribeId);
-            List<Long> currentPoints = this.pointService.getPointsBySubscribeId(subscribeId);
+            Set<Long> currentPoints = this.pointService.getPointsBySubscribeId(subscribeId);
             Point point = GeometryUtil.parseLocation(subscribeString.getLocation());
-            List<Long> newPoints = new ArrayList<>();
+            Set<Long> newPoints = new HashSet<>();
+            Boolean updates = this.pointService.checkUpdates(currentPoints);
             if (subscribeString.getDist() == null){
                 newPoints = this.pointService.getRecByDefault(point.getX(), point.getY());
             } else {
                 newPoints = this.pointService.getRec(point.getX(), point.getY(), subscribeString.getDist(), fractionIds);
             }
-            Collections.sort(newPoints);
             Long chatId = subscribeString.getChatId();
-            if (!Objects.equals(currentPoints, newPoints)) {
+            if (!Objects.equals(currentPoints, newPoints) || updates) {
+                this.subscribeService.deleteSubscribePoint(subscribeId);
+                this.subscribeService.saveSubscribePoint(subscribeId, newPoints);
+                // send message подумать как разнести два критерия
                 log.info("Found changes");
-
             } else {
                 log.info("No changes");
             }
         }
+        this.pointService.setUpdatesFalse();
 
     }
 }

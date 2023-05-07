@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.springbot.reyclemapbot.DTO.Helper;
+import com.springbot.reyclemapbot.DTO.PointDTO;
 import com.springbot.reyclemapbot.config.GeometryUtil;
 import com.springbot.reyclemapbot.model.Points;
 import com.springbot.reyclemapbot.repository.PointFractionRepository;
@@ -78,18 +79,18 @@ public class PointServiceImpl implements PointService {
     }
 
     @Override
-    public List<Long> getRec(Double lon, Double lat, Double dist, Set<String> fractions) {
+    public Set<Long> getRec(Double lon, Double lat, Double dist, Set<String> fractions) {
         return this.pointRepository.getRec(lon, lat, dist, fractions);
     }
 
-    public List<Long> getRecByDefault(Double lon, Double lat){
+    public Set<Long> getRecByDefault(Double lon, Double lat){
         Double dist = 500.00;
         Set<String> fractions = new HashSet<>();
         fractions.add("BUMAGA");
         fractions.add("PLASTIK");
         fractions.add("STEKLO");
         fractions.add("LAMPOCHKI");
-        List<Long> ids = new ArrayList<>();
+        Set<Long> ids = new HashSet<>();
         while ((dist <= 3000)&&(ids.size()< 5)){
             log.info("IN PointService getRec {}", dist);
             ids = this.pointRepository.getRec(lon, lat, dist, fractions);
@@ -101,6 +102,25 @@ public class PointServiceImpl implements PointService {
         return ids;
     }
 
+    public Boolean checkUpdates(Set<Long> pointIds){
+        List<Boolean> updates = this.pointRepository.checkUpdates(pointIds);
+        Boolean answer = false;
+        for (Boolean update: updates){
+            if (update){
+                answer = true;
+                break;
+            } else {
+                answer = false;
+            }
+        }
+        return answer;
+    }
+
+    public PointDTO getPointInfo(Long id){
+        return this.pointRepository.getPointInfo(id);
+    }
+
+
     @Override
     public void delete(Long id) {
         this.pointRepository.deleteById(id);
@@ -111,8 +131,11 @@ public class PointServiceImpl implements PointService {
         return this.pointRepository.getDeleted();
     }
 
-    public List<Long> getPointsBySubscribeId(Long id){
+    public Set<Long> getPointsBySubscribeId(Long id){
         return this.pointRepository.getPointsBySubscribeId(id);
     }
 
+    public void setUpdatesFalse(){
+        this.pointRepository.setUpdatedFalse();
+    }
 }
