@@ -36,23 +36,24 @@ CREATE TABLE IF NOT EXISTS fractions
 
 CREATE TABLE IF NOT EXISTS points_fractions
 (
-    point_id INTEGER,
+    point_id BIGINT,
     fraction_id        INTEGER,
+    last_update TIMESTAMP,
     FOREIGN KEY (point_id) REFERENCES points (id) ON DELETE CASCADE,
     FOREIGN KEY (fraction_id) REFERENCES fractions (id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS subscribes_points
 (
-    subscribe_id INTEGER,
-    point_id        INTEGER,
+    subscribe_id BIGINT,
+    point_id        BIGINT,
     FOREIGN KEY (subscribe_id) REFERENCES subscribes (id),
     FOREIGN KEY (point_id) REFERENCES points (id) ON DELETE CASCADE
 );
 
 CREATE TABLE IF NOT EXISTS subscribes_fractions
 (
-    subscribe_id INTEGER,
+    subscribe_id BIGINT,
     fraction_id        INTEGER,
     FOREIGN KEY (subscribe_id) REFERENCES subscribes (id),
     FOREIGN KEY (fraction_id) REFERENCES fractions (id) ON DELETE CASCADE
@@ -149,17 +150,11 @@ $$
 BEGIN
     IF NEW.address <> OLD.address OR NEW.title <> OLD.title OR NEW.restricted <> OLD.restricted THEN
         UPDATE points_history
-        SET valid_range = tstzrange(lower(valid_range), current_timestamp)
-        WHERE valid_range @> current_timestamp AND point_id = OLD.id;
-
-        INSERT INTO points_history
-        (point_id, geom, address, title, url, restricted, valid_range, updated)
-        VALUES
-            (NEW.id, NEW.geom, NEW.address, NEW.title, NEW.url, NEW.restricted,
-             tstzrange(current_timestamp, NULL), true);
+        SET point_id = NEW.id, geom = NEW.geom, address = NEW.address, title = NEW.title, url = NEW.url,
+            restricted = NEW.restricted, valid_range = tstzrange(current_timestamp, NULL), updated = true;
         RETURN NEW;
     ELSE UPDATE points_history
-         SET valid_range = tstzrange(current_timestamp, NULL), updated = false
+         SET valid_range = tstzrange(current_timestamp, NULL)
          WHERE upper(valid_range) is NULL AND point_id = OLD.id;
     END IF;
     RETURN OLD;
@@ -170,3 +165,5 @@ $$
 CREATE TRIGGER points_update_trigger
     AFTER UPDATE ON points
     FOR EACH ROW EXECUTE PROCEDURE points_update();
+
+
