@@ -36,7 +36,7 @@ public class HelpController {
 
     private final SubscribeServiceImpl subscribeService;
 
-    @Scheduled(cron = "${interval-in-cron}")
+    // @Scheduled(cron = "${interval-in-cron}")
     @RequestMapping(value = "/updatedb", method = RequestMethod.POST)
     public void update() throws IOException {
         this.fractionService.save();

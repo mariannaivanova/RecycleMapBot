@@ -1,4 +1,4 @@
-package com.springbot.recyclemapbot.config;
+package com.springbot.recyclemapbot.telegram;
 
 public enum BotState {
     SUBSCRIBE,

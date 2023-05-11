@@ -24,7 +24,8 @@ public interface PointRepository extends JpaRepository<Points, Integer> {
     @Query(value="WITH ins1 AS (\n" +
             "  insert into points(id, address, title, geom, url, restricted)\n" +
             "  values (:id, :address, :title, st_setsrid(st_makepoint(:lon, :lat), 4326), :url, :restricted)\n" +
-            "  ON CONFLICT (id) DO UPDATE SET address = excluded.address, title = excluded.title, geom = excluded.geom, url = excluded.url, restricted = excluded.restricted\n" +
+            "  ON CONFLICT (id) DO UPDATE SET address = excluded.address, title = excluded.title, geom = excluded.geom, " +
+            "  url = excluded.url, restricted = excluded.restricted\n" +
             "   RETURNING id AS point_id\n" +
             "   ), ins2 AS (\n" +
             "INSERT INTO points_fractions(point_id, fraction_id)\n" +
@@ -63,7 +64,7 @@ public interface PointRepository extends JpaRepository<Points, Integer> {
     @Query(value = "select point_id \n" +
             "\tfrom points_history \n" +
             "\twhere updated = false and upper(valid_range) is NULL\n" +
-            "\t\t\t\tand (now() - INTERVAL '1 day') > lower(valid_range) and point_id < 10", nativeQuery = true)
+            "\t\t\t\tand (now() - INTERVAL '1 day') > lower(valid_range)", nativeQuery = true)
     public List<Long> getDeleted();
 
 

@@ -14,9 +14,9 @@ public class RecycleMapBotApplication {
         SpringApplication.run(RecycleMapBotApplication.class, args);
     }
 
-    @Bean
+  /*  @Bean
     public JtsModule jtsModule() {
         // This module will provide a Serializer for geometries
         return new JtsModule();
-    }
+    }*/
 }

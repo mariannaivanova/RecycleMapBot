@@ -1,4 +1,7 @@
 package com.springbot.recyclemapbot.config;
+/*
+
+import com.springbot.recyclemapbot.telegram.BotState;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -10,4 +13,4 @@ public class BotStateCash {
         botStateMap.put(chatId, botState);
     }
 
-}
+}*/

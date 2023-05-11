@@ -1,4 +1,4 @@
-package com.springbot.recyclemapbot.config;
+package com.springbot.recyclemapbot.telegram;
 
 import org.springframework.stereotype.Service;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
@@ -12,12 +12,6 @@ import java.util.List;
 @Service
 public class MenuService {
 
-
-   /* public SendMessage getMainMenuMessage(final long chatId, final String textMessage, final long userId) {
-        final ReplyKeyboardMarkup replyKeyboardMarkup = getMainMenuKeyboard(userId);
-
-        return createMessageWithKeyboard(chatId, textMessage, replyKeyboardMarkup);
-    }*/
 
     //Main menu
     public SendMessage getMainMenuKeyboard(Long chatId) {
@@ -44,19 +38,6 @@ public class MenuService {
         replyKeyboardMarkup.setKeyboard(keyboard);
         m.setReplyMarkup(replyKeyboardMarkup);
         return m;
-    }
-
-    private SendMessage createMessageWithKeyboard(final long chatId,
-                                                  String textMessage,
-                                                  final ReplyKeyboardMarkup replyKeyboardMarkup) {
-        final SendMessage sendMessage = new SendMessage();
-        sendMessage.enableMarkdown(true);
-        sendMessage.setChatId(String.valueOf(chatId));
-        sendMessage.setText(textMessage);
-        if (replyKeyboardMarkup != null) {
-            sendMessage.setReplyMarkup(replyKeyboardMarkup);
-        }
-        return sendMessage;
     }
 
 

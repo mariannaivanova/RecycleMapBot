@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS points
 (
     id  BIGINT                NOT NULL PRIMARY KEY,
     geom     geometry(POINT, 4326),
-    address VARCHAR,
+    address TEXT,
     title VARCHAR,
     url VARCHAR,
     restricted BOOLEAN
@@ -72,7 +72,7 @@ CREATE TABLE IF NOT EXISTS points_history (
                                               hid SERIAL PRIMARY KEY,
                                               point_id BIGINT,
                                               geom     geometry(POINT, 4326),
-                                              address VARCHAR,
+                                              address TEXT,
                                               title VARCHAR,
                                               url VARCHAR,
                                               restricted BOOLEAN,

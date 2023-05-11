@@ -91,6 +91,6 @@ public class PointController {
 
     @RequestMapping(value = "/pointsWithParameters", method = RequestMethod.GET)
     public Set<Long> getWithParameters(@RequestParam Double lon, @RequestParam Double lat, @RequestParam Double dist, @RequestParam Set<String> fractionIds) throws IOException {
-        return this.pointService.getRec(lat, lon, dist, fractionIds);
+        return this.pointService.getRec(lon, lat, dist, fractionIds);
     }
 }
