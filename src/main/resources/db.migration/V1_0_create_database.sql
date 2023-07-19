@@ -109,7 +109,7 @@ SELECT id, geom, address, title, url, restricted,
 FROM points;
 
 
-CREATE OR REPLACE FUNCTION points_insert() RETURNS trigger AS
+CREATE OR REPLACE FUNCTION points_insert() RETURNS trigger LANGUAGE 'plpgsql' AS
 $$
 BEGIN
     INSERT INTO points_history
@@ -119,15 +119,15 @@ BEGIN
          tstzrange(current_timestamp, NULL), false);
     RETURN NEW;
 END;
-$$
-    LANGUAGE plpgsql;
+$$;
+
 
 CREATE TRIGGER points_insert_trigger
     AFTER INSERT ON points
     FOR EACH ROW EXECUTE PROCEDURE points_insert();
 
 
-CREATE OR REPLACE FUNCTION points_delete() RETURNS trigger AS
+CREATE OR REPLACE FUNCTION points_delete() RETURNS trigger LANGUAGE 'plpgsql' AS
 $$
 BEGIN
     UPDATE points_history
@@ -137,15 +137,14 @@ BEGIN
     /* DELETE FROM points_fractions where point_id = OLD.id;*/
     RETURN NULL;
 END;
-$$
-    LANGUAGE plpgsql;
+$$;
 
 
 CREATE TRIGGER points_delete_trigger
     AFTER DELETE ON points
     FOR EACH ROW EXECUTE PROCEDURE points_delete();
 
-CREATE OR REPLACE FUNCTION points_update() RETURNS trigger AS
+CREATE OR REPLACE FUNCTION points_update() RETURNS trigger LANGUAGE 'plpgsql' AS
 $$
 BEGIN
     IF NEW.address <> OLD.address OR NEW.title <> OLD.title OR NEW.restricted <> OLD.restricted THEN
@@ -159,8 +158,8 @@ BEGIN
     END IF;
     RETURN OLD;
 END;
-$$
-    LANGUAGE plpgsql;
+$$;
+
 
 CREATE TRIGGER points_update_trigger
     AFTER UPDATE ON points

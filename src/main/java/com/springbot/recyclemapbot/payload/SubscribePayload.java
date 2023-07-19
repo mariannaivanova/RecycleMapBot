@@ -34,67 +34,70 @@ public class SubscribePayload {
         for (String fraction: fractions){
             switch(fraction){
                 case ("BUMAGA"):
-                    fractionsNormal.add("бумага");
+                    fractionsNormal.add("\uD83D\uDDDE бумага");
                     break;
                 case ("PLASTIK"):
-                    fractionsNormal.add("пластик");
+                    fractionsNormal.add("\uD83E\uDD64 пластик");
                     break;
                 case ("STEKLO"):
-                    fractionsNormal.add("стекло");
+                    fractionsNormal.add("\uD83E\uDED9 стекло");
                     break;
                 case ("METALL"):
-                    fractionsNormal.add("металл");
+                    fractionsNormal.add("⛓ металл");
                     break;
                 case ("TETRA_PAK"):
-                    fractionsNormal.add("тетра пак");
+                    fractionsNormal.add("\uD83E\uDDC3 тетра пак");
                     break;
                 case ("ODEZHDA"):
-                    fractionsNormal.add("одежда");
+                    fractionsNormal.add("\uD83D\uDC55 одежда");
                     break;
                 case ("LAMPOCHKI"):
-                    fractionsNormal.add("лампочки");
+                    fractionsNormal.add("\uD83D\uDCA1 лампочки");
                     break;
                 case ("KRYSHECHKI"):
-                    fractionsNormal.add("крышечки");
+                    fractionsNormal.add("\uD83D\uDD73 крышечки");
                     break;
                 case ("BYTOVAJA_TEHNIKA"):
-                    fractionsNormal.add("бытовая техника");
+                    fractionsNormal.add("\uD83C\uDF9B бытовая техника");
                     break;
                 case ("BATAREJKI"):
-                    fractionsNormal.add("батарейки");
+                    fractionsNormal.add("\uD83D\uDD0B батарейки");
                     break;
                 case ("SHINY"):
-                    fractionsNormal.add("шины");
+                    fractionsNormal.add("⚙️ шины");
                     break;
                 case ("OPASNYE_OTHODY"):
-                    fractionsNormal.add("опасные отходы");
+                    fractionsNormal.add("⚠️ опасные отходы");
                     break;
                 case ("INOE"):
-                    fractionsNormal.add("иное");
+                    fractionsNormal.add("\uD83E\uDD14 иное");
                     break;
                 default:
             }
         }
-        return fractionsNormal.toString().replaceAll("\\[|\\]","");
+        String f = "";
+        for (String fraction : fractionsNormal) {
+            f += fraction + "\n";
+        }
+        //return fractionsNormal.toString().replaceAll("\\[|\\]","");
+        return f;
     }
 
     public String showPoints(){
         String answer = "";
         for (String pointAddress: pointsAddress){
-            answer += pointAddress + "\n";
+            answer +=  "• " +pointAddress + "\n";
         }
         return answer;
     }
 
     public String getText(){
         String answer = "";
-        answer += this.location + "\n";
-        if (this.distance != null) {
-            answer += this.distance.toString() + "\n";
-        }
-        answer += "\n";
         answer += toNornalNames() + "\n";
-        answer += "\n";
+        if (this.distance != null) {
+            answer +=  (int)(this.distance/(3.6*60)) + " минут";
+        }
+        answer += "\n\n";
         answer += showPoints();
         return answer;
     }

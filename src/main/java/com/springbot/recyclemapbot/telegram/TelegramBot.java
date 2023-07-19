@@ -46,6 +46,8 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+
+
 @RequiredArgsConstructor
 @Slf4j
 @EnableAsync
@@ -84,6 +86,20 @@ public class TelegramBot extends TelegramLongPollingBot {
 
     private Double lat;
 
+
+//    Geocoder geocoder;
+//    List<Address> addresses;
+//    geocoder = new Geocoder(this, Locale.getDefault());
+//
+//    addresses = geocoder.getFromLocation(latitude, longitude, 1); // Here 1 represent max location result to returned, by documents it recommended 1 to 5
+//
+//    String address = addresses.get(0).getAddressLine(0); // If any additional address line present than only, check with max available address lines by getMaxAddressLineIndex()
+//    String city = addresses.get(0).getLocality();
+//    String state = addresses.get(0).getAdminArea();
+//    String country = addresses.get(0).getCountryName();
+//    String postalCode = addresses.get(0).getPostalCode();
+//    String knownName = addresses.get(0).getFeatureName(); // Only if available else return NULL
+
     private final ApplicationController applicationController;
 
     Set<Long> pointIds = new HashSet<>();
@@ -95,6 +111,60 @@ public class TelegramBot extends TelegramLongPollingBot {
     BotState botState;
 
     String title;
+
+    public String toNormalNames(Set<String> fractions){
+        Set<String> fractionsNormal = new HashSet<>();
+        for (String fraction: fractions){
+            switch(fraction){
+                case ("BUMAGA"):
+                    fractionsNormal.add("\uD83D\uDDDE бумага");
+                    break;
+                case ("PLASTIK"):
+                    fractionsNormal.add("\uD83E\uDD64 пластик");
+                    break;
+                case ("STEKLO"):
+                    fractionsNormal.add("\uD83E\uDED9 стекло");
+                    break;
+                case ("METALL"):
+                    fractionsNormal.add("⛓ металл");
+                    break;
+                case ("TETRA_PAK"):
+                    fractionsNormal.add("\uD83E\uDDC3 тетра пак");
+                    break;
+                case ("ODEZHDA"):
+                    fractionsNormal.add("\uD83D\uDC55 одежда");
+                    break;
+                case ("LAMPOCHKI"):
+                    fractionsNormal.add("\uD83D\uDCA1 лампочки");
+                    break;
+                case ("KRYSHECHKI"):
+                    fractionsNormal.add("\uD83D\uDD73 крышечки");
+                    break;
+                case ("BYTOVAJA_TEHNIKA"):
+                    fractionsNormal.add("\uD83C\uDF9B бытовая техника");
+                    break;
+                case ("BATAREJKI"):
+                    fractionsNormal.add("\uD83D\uDD0B батарейки");
+                    break;
+                case ("SHINY"):
+                    fractionsNormal.add("⚙️ шины");
+                    break;
+                case ("OPASNYE_OTHODY"):
+                    fractionsNormal.add("⚠️ опасные отходы");
+                    break;
+                case ("INOE"):
+                    fractionsNormal.add("\uD83E\uDD14 иное");
+                    break;
+                default:
+            }
+        }
+        String f = "";
+        for (String fraction : fractionsNormal) {
+            f += fraction + "\n";
+        }
+        //return fractionsNormal.toString().replaceAll("\\[|\\]","");
+        return f;
+    }
 
     @Override
     public String getBotUsername() { return config.getBotUsername(); }
@@ -121,12 +191,12 @@ public class TelegramBot extends TelegramLongPollingBot {
                         try {
                             pointIds = pointController.getWithParameters(lon, lat, dist, fractions);
                             List<PointPayload> pointPayloads = pointController.getPayloadForUser(pointIds);
-                            for (PointPayload pointPayload : pointPayloads) {
-                                String answer = pointPayload.getTitle() + "\n" + pointPayload.getUrl() + "\n" + "\n" + pointPayload.getAddress()
-                                        + "\n" + pointPayload.toNornalNames();
-                                sendMessage(chatId, answer);
-                            }
-                            sendMessage(chatId, "Мы нашли ближайшие пять точек для сбора: <b>пластика</b>, <b>стекла</b>, <b>батареек</b> и <b>лампочек</b>.\n\nЧтобы подписаться на обновления этих точек, нажмите /subscribe\n\nЧтобы настроить поиск нажмите /setDistance");
+                           // for (PointPayload pointPayload : pointPayloads) {
+//                                String answer = "\uD83D\uDCCD" + pointPayload.getTitle() + "\n" + pointPayload.getUrl() + "\n" + "\n" + pointPayload.getAddress()
+//                                        + "\n" + pointPayload.toNornalNames();
+//                                sendMessage(chatId, answer);
+                           // }
+                            sendMessage(chatId, "Чтобы настроить поиск нажмите /setDistance");
                             log.info("Reply sent /subscribe");
 
                         } catch (IOException e) {
@@ -165,6 +235,9 @@ public class TelegramBot extends TelegramLongPollingBot {
                         log.info("Subscribe typed");
                         try {
                             saveSubscribe(chatId, lon, lat, dist, fractions, pointIds);
+                            int time = (int) (dist/(1.38*60));
+                            String f = toNormalNames(fractions);
+                            sendMessage(chatId, "Отлично! Теперь твоя подписка выглядит так: \n\nВремя в пути: \n" + time + " минут \n\n️ " + "Фракции: \n" + f);
 
                         } catch (IOException e) {
                             e.printStackTrace();
@@ -208,8 +281,9 @@ public class TelegramBot extends TelegramLongPollingBot {
                                 sendMessage(chatId, answer);
                             }
                             for (PointPayload pointPayload : pointPayloads) {
-                                String answer = pointPayload.getTitle() + "\n" + pointPayload.getUrl() + "\n" + "\n" + pointPayload.getAddress()
-                                        + "\n" + pointPayload.toNornalNames();
+                                int time = (int) (dist/(1.38*60));
+                                String answer = "\uD83D\uDCCD" + pointPayload.getTitle() + "\n" + pointPayload.getUrl() + "\n" + "\n" + pointPayload.getAddress()
+                                        + "\n"  + toNormalNames(pointPayload.getFractions()) + "\n Время в пути: " + time + " минут";
                                 sendMessage(chatId, answer);
                             }
                             sendMessage(chatId, "Нажмите /subscribe или настройте поиск заново /setDistance");
@@ -322,79 +396,79 @@ public class TelegramBot extends TelegramLongPollingBot {
                     sendMessage(chatId, answer);
                     break;
                 case ("BUMAGA"):
-                    answer = "выбрали бумагу";
+                    answer = "Выбрали бумагу";
                     fractions.add("BUMAGA");
                     log.info("Fractions " + fractions);
                     sendMessage(chatId, answer);
                     break;
                 case ("PLASTIK"):
-                    answer = "выбрали пластик";
+                    answer = "Выбрали пластик";
                     fractions.add("PLASTIK");
                     log.info("Fractions " + fractions);
                     sendMessage(chatId, answer);
                     break;
                 case ("STEKLO"):
-                    answer = "выбрали стекло";
+                    answer = "Выбрали стекло";
                     fractions.add("STEKLO");
                     log.info("Fractions " + fractions);
                     sendMessage(chatId, answer);
                     break;
                 case ("METALL"):
-                    answer = "выбрали металл";
+                    answer = "Выбрали металл";
                     fractions.add("METALL");
                     log.info("Fractions " + fractions);
                     sendMessage(chatId, answer);
                     break;
                 case ("TETRA_PAK"):
-                    answer = "выбрали тетра пак";
+                    answer = "Выбрали тетра пак";
                     fractions.add("TETRA_PAK");
                     log.info("Fractions " + fractions);
                     sendMessage(chatId, answer);
                     break;
                 case ("ODEZHDA"):
-                    answer = "выбрали одежда";
+                    answer = "Выбрали одежда";
                     fractions.add("ODEZHDA");
                     log.info("Fractions " + fractions);
                     sendMessage(chatId, answer);
                     break;
                 case ("LAMPOCHKI"):
-                    answer = "выбрали лампочки";
+                    answer = "Выбрали лампочки";
                     fractions.add("LAMPOCHKI");
                     log.info("Fractions " + fractions);
                     sendMessage(chatId, answer);
                     break;
                 case ("KRYSHECHKI"):
-                    answer = "выбрали крышечки";
+                    answer = "Выбрали крышечки";
                     fractions.add("KRYSHECHKI");
                     log.info("Fractions " + fractions);
                     sendMessage(chatId, answer);
                     break;
                 case ("BYTOVAJA_TEHNIKA"):
-                    answer = "выбрали бытовая техника";
+                    answer = "Выбрали бытовая техника";
                     fractions.add("BYTOVAJA_TEHNIKA");
                     log.info("Fractions " + fractions);
                     sendMessage(chatId, answer);
                     break;
                 case ("BATAREJKI"):
-                    answer = "выбрали батарейки";
+                    answer = "Выбрали батарейки";
                     fractions.add("BATAREJKI");
                     log.info("Fractions " + fractions);
                     sendMessage(chatId, answer);
                     break;
                 case ("SHINY"):
-                    answer = "выбрали шины";
+                    answer = "Выбрали шины";
                     fractions.add("SHINY");
                     log.info("Fractions " + fractions);
                     sendMessage(chatId, answer);
                     break;
                 case ("OPASNYE_OTHODY"):
-                    answer = "выбрали опасные отходы";
+                    answer = "Выбрали опасные отходы";
                     fractions.add("OPASNYE_OTHODY");
                     log.info("Fractions " + fractions);
                     sendMessage(chatId, answer);
                     break;
                 case ("INOE"):
-                    answer = "выбрали иное";
+                    answer = "Выбрали иное";
                     fractions.add("INOE");
                     log.info("Fractions " + fractions);
                     sendMessage(chatId, answer);

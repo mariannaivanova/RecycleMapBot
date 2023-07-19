@@ -41,7 +41,7 @@ public class PointServiceImpl implements PointService {
         URL url = new URL(POINTS_URL+ "-180,-89,180,89");
         ObjectMapper mapper = new ObjectMapper();
         Integer pointsNumber = mapper.readTree(url).get("data").get("totalResults").asInt();
-        Integer i = 29493;
+        Integer i = 0;
 
         while (i <= pointsNumber) {
             URL curUrl = new URL(POINTS_URL + "-180,-89,180,89"+ "&size=100" + "&offset=" + i);
