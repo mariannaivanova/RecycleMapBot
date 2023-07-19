@@ -295,7 +295,7 @@ public class TelegramBot extends TelegramLongPollingBot {
                         sendMessage(chatId, "Прикрепите геопозицию того места, в котором хотите видеть точку сбора.\n\nДля этого нажми на скрепку -> значок геолокации -> отправить эту локацию");
                         break;
                     case "/setTitle":
-                        sendMessage(chatId, "Введите название своей подписки");
+                        sendMessage(chatId, "Введите название своей точки");
                         log.info("fractions for application", fractions);
                         break;
                     case "/help":
